@@ -31,11 +31,12 @@ class SpringFoxConfig {
                                         "https://dvnlabs.xyz",
                                         "dbasudewa@gmail.com"
                                 ))
+                                .version("Version 3")
                                 .build()
                 )
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
-                .build().pathMapping("/")
+                .build()
     }
 }
