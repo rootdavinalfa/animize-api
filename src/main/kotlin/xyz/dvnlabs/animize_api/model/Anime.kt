@@ -16,7 +16,7 @@ import xyz.dvnlabs.animize_api.core.Constant
 data class Anime(
         @Id
         @Indexed
-        val id: String,
+        var id: String,
         @Indexed
         @Field
         var nameCatalogue: String,

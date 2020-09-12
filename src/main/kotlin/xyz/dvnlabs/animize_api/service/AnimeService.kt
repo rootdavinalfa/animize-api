@@ -11,11 +11,13 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import xyz.dvnlabs.animize_api.core.CommonHelper
 import xyz.dvnlabs.animize_api.core.GenericService
 import xyz.dvnlabs.animize_api.core.responses.ExistsResponse
 import xyz.dvnlabs.animize_api.core.responses.NotFoundResponse
 import xyz.dvnlabs.animize_api.model.Anime
 import xyz.dvnlabs.animize_api.model.AnimeEpisode
+import xyz.dvnlabs.animize_api.model.User
 import xyz.dvnlabs.animize_api.repository.AnimeRepository
 
 @Service
@@ -23,6 +25,9 @@ import xyz.dvnlabs.animize_api.repository.AnimeRepository
 class AnimeServiceImpl : AnimeService {
     @Autowired
     private lateinit var animeRepository: AnimeRepository
+
+    @Autowired
+    private lateinit var commonHelper: CommonHelper
 
     override fun findAll(pageable: Pageable): Page<Anime> {
         return animeRepository.findAll(pageable)
@@ -36,7 +41,12 @@ class AnimeServiceImpl : AnimeService {
         if (animeRepository.existsById(entity.id)) {
             throw ExistsResponse("Anime with ID ${entity.id} is exist")
         }
-        entity.id.toUpperCase()
+        val max = commonHelper.queryMaxId("id", Anime::class.java)
+        entity.id = if (max != null) {
+            CommonHelper.fillString("PKG", (max as Anime).id, 4)
+        } else {
+            "PKG0001"
+        }
         return animeRepository.save(entity)
     }
 
@@ -92,9 +102,14 @@ class AnimeServiceImpl : AnimeService {
         anims.episodes?.add(episode)
         return animeRepository.save(anims)
     }
+
+    override fun findSearch(search: String): List<Anime> {
+        return animeRepository.findAllByNameCatalogueLikeIgnoreCase(search)
+    }
 }
 
 interface AnimeService : GenericService<Anime, String> {
     fun findByGenre(genre: String): List<Anime>
     fun newEpisode(episode: AnimeEpisode): Anime
+    fun findSearch(search : String) : List<Anime>
 }

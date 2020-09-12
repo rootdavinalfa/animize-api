@@ -8,6 +8,7 @@ package xyz.dvnlabs.animize_api.controller
 
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
@@ -47,8 +48,12 @@ class AnimeController {
 
     @GetMapping("/list")
     @ApiOperation("Get anime list")
-    fun animeList(): SuccessResponse {
-        val data = service.findAll()
+    fun animeList(@ApiParam("Specified search query") @RequestParam("search", defaultValue = "") search: String): SuccessResponse {
+        val data = if (search.isEmpty()) {
+            service.findAll()
+        } else {
+            service.findSearch(search)
+        }
         return SuccessResponse(
                 message = "All Anime List",
                 data = data
